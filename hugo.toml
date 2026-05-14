@@ -1,0 +1,50 @@
+baseURL = 'https://example.org/'
+locale = 'zh-cn'
+defaultContentLanguage = 'zh'
+title = '我的文档网站'
+theme = 'book'
+
+[params]
+  # 启用目录
+  BookToC = true
+  # 禁用黑暗模式
+  DisableDarkMode = false
+  # 禁用搜索
+  DisableSearch = false
+  # 禁用特殊首页
+  DisableSpecial1stPost = false
+  # 禁用搜索索引
+  DisableSearchIndex = false
+  # 启用章节折叠
+  BookCollapse = false
+  # 主题模式: auto, light, dark
+  BookTheme = 'auto'
+  # 内容目录
+  BookSection = 'docs'
+  # 启用评论
+  BookComments = false
+  # 启用外部链接
+  BookExtlinks = false
+  # 启用搜索
+  BookSearch = true
+  # 日期格式
+  BookDateFormat = '2006-01-02'
+  # GitHub 仓库地址
+  BookRepo = 'https://github.com/your-username/your-repo'
+  # 编辑链接路径
+  BookEditPath = 'edit/main'
+  # 分支版本
+  BookVersion = 'main'
+  # 菜单路径
+  BookMenuBundle = '/menu'
+  # 启用页面描述
+  BookPageDescription = true
+  # 翻译前缀
+  BookTranslatedPrefix = ''
+  # 警告重复页面
+  BookWarnDuplicatePages = true
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
