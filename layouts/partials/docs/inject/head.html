@@ -1,4 +1,55 @@
-{{ $custom := resources.Get "css/custom.css" }}
-{{ with $custom }}
-  <link rel="stylesheet" href="{{ .RelPermalink }}">
-{{ end }}
+<style>
+/* Sidebar toggle button */
+.sidebar-toggle {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  background: var(--book-background, #fff);
+  border: 1px solid #ddd;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle:hover {
+  background: #f0f0f0;
+}
+
+.sidebar-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+/* Collapsed state */
+body.sidebar-collapsed .book-menu {
+  margin-left: -260px;
+}
+
+body.sidebar-collapsed .sidebar-toggle {
+  left: 0;
+}
+
+body.sidebar-collapsed .sidebar-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Smooth transition */
+.book-menu {
+  transition: margin-left 0.3s ease;
+}
+
+/* Hide toggle on mobile */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}
+</style>
