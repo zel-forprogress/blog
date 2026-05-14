@@ -1,7 +1,7 @@
 baseURL = 'https://example.org/'
 locale = 'zh-cn'
 defaultContentLanguage = 'zh'
-title = '我的文档网站'
+title = 'Hardy Blog'
 theme = 'book'
 
 [params]
