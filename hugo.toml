@@ -1,4 +1,4 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://zel-forprogress.github.io/blog/'
 locale = 'zh-cn'
 defaultContentLanguage = 'zh'
 title = 'Hardy Blog'
@@ -30,19 +30,36 @@ theme = 'book'
   # 日期格式
   BookDateFormat = '2006-01-02'
   # GitHub 仓库地址
-  BookRepo = 'https://github.com/your-username/your-repo'
+  BookRepo = 'https://github.com/zel-forprogress/blog'
   # 编辑链接路径
   BookEditPath = 'edit/main'
   # 分支版本
   BookVersion = 'main'
-  # 菜单路径
-  BookMenuBundle = '/menu'
   # 启用页面描述
   BookPageDescription = true
   # 翻译前缀
   BookTranslatedPrefix = ''
   # 警告重复页面
   BookWarnDuplicatePages = true
+
+# 菜单配置
+[[menu.main]]
+  identifier = "docs"
+  name = "文档"
+  url = "/docs"
+  weight = 1
+
+[[menu.main]]
+  identifier = "daily"
+  name = "日报"
+  url = "/daily"
+  weight = 2
+
+[[menu.main]]
+  identifier = "agent"
+  name = "Agent"
+  url = "/agent"
+  weight = 3
 
 [markup]
   [markup.goldmark]
