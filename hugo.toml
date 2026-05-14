@@ -19,8 +19,8 @@ theme = 'book'
   BookCollapse = false
   # 主题模式: auto, light, dark
   BookTheme = 'auto'
-  # 内容目录
-  BookSection = 'docs'
+  # 显示所有栏目
+  BookSection = '*'
   # 启用评论
   BookComments = false
   # 启用外部链接
