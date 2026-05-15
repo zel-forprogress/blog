@@ -1,6 +1,7 @@
 ---
 title: "日报"
 weight: 10
+bookCollapseSection: true
 ---
 
 # 日报

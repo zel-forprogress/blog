@@ -1,6 +1,7 @@
 ---
 title: "欢迎"
 weight: 1
+bookCollapseSection: true
 ---
 
 # 欢迎来到我的文档网站
