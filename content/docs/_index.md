@@ -18,16 +18,4 @@ bookCollapseSection: true
 
 ## 快速开始
 
-{{< columns >}}
-
-### 左栏内容
-
-这是左栏的内容示例。
-
-<--->
-
-### 右栏内容
-
-这是右栏的内容示例。
-
-{{< /columns >}}
+请查看 [快速开始]({{< relref "getting-started" >}}) 了解如何使用。
