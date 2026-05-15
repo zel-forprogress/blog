@@ -53,6 +53,9 @@ ${recentContent}
 - 保持简洁，不超过 300 字
 - 直接输出 Markdown 内容，不要包含代码块标记`;
 
+  console.log('API_KEY 存在:', !!API_KEY);
+  console.log('API_URL:', API_URL);
+
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -75,7 +78,9 @@ ${recentContent}
     })
   });
 
+  console.log('响应状态:', response.status);
   const data = await response.json();
+  console.log('API 响应:', JSON.stringify(data, null, 2));
 
   if (data.output && data.output.choices) {
     return data.output.choices[0].message.content;
