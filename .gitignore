@@ -15,3 +15,6 @@ Thumbs.db
 
 # Hugo temporary files
 .hugo_build.lock
+
+# Node modules
+scripts/node_modules/
