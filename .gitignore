@@ -18,3 +18,6 @@ Thumbs.db
 
 # Node modules
 scripts/node_modules/
+
+# 飞书密钥（勿提交）
+scripts/.env

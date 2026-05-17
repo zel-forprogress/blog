@@ -44,22 +44,28 @@ theme = 'book'
 
 # 菜单配置
 [[menu.main]]
-  identifier = "docs"
-  name = "文档"
-  url = "/docs"
+  identifier = "project"
+  name = "项目"
+  url = "/project"
   weight = 1
+
+[[menu.main]]
+  identifier = "wendang"
+  name = "文档"
+  url = "/wendang"
+  weight = 2
 
 [[menu.main]]
   identifier = "daily"
   name = "日报"
   url = "/daily"
-  weight = 2
+  weight = 3
 
 [[menu.main]]
   identifier = "agent"
   name = "Agent"
   url = "/agent"
-  weight = 3
+  weight = 4
 
 [markup]
   [markup.goldmark]

@@ -4,6 +4,7 @@
   "description": "Auto generate daily report using Tongyi Qianwen API",
   "main": "generate-daily.js",
   "scripts": {
-    "generate": "node generate-daily.js"
+    "generate": "node generate-daily.js",
+    "sync-feishu": "node sync-feishu.js"
   }
 }

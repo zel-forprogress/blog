@@ -8,7 +8,7 @@ const CONTENT_DIR = path.join(__dirname, '../content');
 
 // 读取最近的内容
 function getRecentContent() {
-  const sections = ['docs', 'daily', 'agent'];
+  const sections = ['project', 'wendang', 'daily', 'agent'];
   const content = [];
 
   for (const section of sections) {
