@@ -31,6 +31,9 @@ const ROOT_FOLDERS = {
 
 const CONTENT_DIR = path.join(__dirname, '../content');
 const STATE_FILE = path.join(__dirname, '.feishu-sync-state.json');
+const SYNC_FORMAT = 'blocks-v1';
+
+const { fetchDocumentMarkdown } = require('./feishu-docx-to-md');
 
 function requireEnv() {
   const missing = [];
@@ -94,12 +97,8 @@ async function listNodes(token, parentNodeToken = '') {
   return items;
 }
 
-async function getDocxContent(token, documentId) {
-  const url = `https://open.feishu.cn/open-apis/docx/v1/documents/${documentId}/raw_content`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  const data = await res.json();
-  if (data.code !== 0) throw new Error(`读取文档失败 (${documentId}): ${JSON.stringify(data)}`);
-  return data.data.content || '';
+async function getDocxMarkdown(token, documentId) {
+  return fetchDocumentMarkdown(token, documentId);
 }
 
 function slugify(title) {
@@ -145,13 +144,17 @@ async function syncNode(token, node, state, targetSection) {
   const filename = resolveFilename(node.title, targetSection);
   const relPath = `${targetSection}/${filename}`;
 
-  if (state[key]?.edit_time === editTime && state[key]?.file === relPath) {
+  if (
+    state[key]?.edit_time === editTime &&
+    state[key]?.file === relPath &&
+    state[key]?.format === SYNC_FORMAT
+  ) {
     console.log(`无变化: [${targetSection}] ${node.title}`);
     return;
   }
 
-  const content = await getDocxContent(token, node.obj_token);
-  await sleep(250);
+  const content = await getDocxMarkdown(token, node.obj_token);
+  await sleep(300);
 
   const date = editTime
     ? new Date(Number(editTime) * 1000).toISOString().slice(0, 10)
@@ -167,14 +170,11 @@ feishu_node_token: "${node.node_token}"
 feishu_edit_time: "${editTime}"
 ---
 
-# ${node.title}
-
-${content}
-`;
+${content}`;
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, md, 'utf-8');
-  state[key] = { edit_time: editTime, file: relPath, section: targetSection };
+  state[key] = { edit_time: editTime, file: relPath, section: targetSection, format: SYNC_FORMAT };
   console.log(`已同步 [${targetSection}]: ${filePath}`);
 }
 
@@ -196,6 +196,7 @@ async function main() {
 
   console.log(`知识库 space_id: ${SPACE_ID}`);
   console.log('目录映射: 知识库→文档(wendang), 日报→daily, 项目开发文档→project');
+  console.log('内容格式: 飞书 Block → Markdown');
 
   const state = loadState();
   const rootNodes = await listNodes(token, '');
