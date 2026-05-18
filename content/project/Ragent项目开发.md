@@ -1,82 +1,141 @@
 ---
 title: "Ragent项目开发"
-date: 2026-04-23
+date: 2026-05-18
 feishu_node_token: "BN1DwvzhDiYp7xkkZH4cjYwJnle"
-feishu_edit_time: "1776933615"
+feishu_edit_time: "1779095859"
 ---
 
-# 一、知识记录
+Ragent（[官方介绍链接](https://nageoffer.com/ragent)）是一个面向企业场景的 Agentic RAG 平台：**从文档入库**、**向量索引**到**多路检索**、**意图识别**、**MCP 工具调用**和**流式问答**，形成完整闭环。定位是 Java 后端开发者学习/落地 AI 应用的开源参考实现，而不是「调 API + 向量库」的 Demo。
 
-## 消息队列（MQ message queue）
+### 技术栈
 
-**什么是消息队列？**
+<!-- 暂不支持的块类型: 30 -->
 
-可以把 **消息队列想象成“排队的邮箱”或者“传送带”**：
+### 项目模块
 
-- **生产者（Producer）**：把消息放到队列里，就像把信件投到邮箱里。
+```
+ragent/
+├── bootstrap/      # 业务启动模块（核心业务逻辑）
+├── framework/      # 通用基础设施层（与业务无关）
+├── infra-ai/       # AI基础设施层（屏蔽模型供应商差异）
+├── mcp-server/     # MCP服务器模块
+└── frontend/       # React前端（约18000行代码）
+```
 
-- **队列（Queue）**：信箱或者传送带，负责存放消息，按顺序传递。
+### 核心特性
 
-- **消费者（Consumer）**：从队列里取消息去处理，就像邮递员把信送到收件人手上。
+1. **多路检索并行 + 后处理流水线**
 
-关键点：**生产者不用管消费者什么时候处理消息，只管放消息进去就行**。
+2. **模型路由 + 首包探测 + 自动降级**
+
+3. **可编排的文档入库 Pipeline**
+
+4. **分布式排队限流（Redis ZSET + Pub/Sub）**
+
+5. **8个专用线程池 + TTL上下文透传**
+
+6. **三态熔断器（CLOSED → OPEN → HALF_OPEN）**
+
+7. **全链路 Trace 可观测性**
+
+8. **完整管理后台 + 用户问答界面**
+
+## 一、启动
+
+使用docker来部署启动所需要的中间件，不影响我们的本地环境，方遍又快捷
+
+**1. 启动 Docker 中间件**（如果还没启动）（让ai编辑一份docker-compose.yml文件；需要先运行docker desktop）
+
+```bash
+docker compose up -d
+```
+
+**2. 编译项目**（首次或代码有改动时）
+
+```bash
+mvn clean install -DskipTests
+```
+
+**3. 启动后端**（新终端）
+
+```bash
+mvn spring-boot:run -pl bootstrap
+```
+
+**4. 启动前端**（新终端）
+
+```bash
+cd frontend
+npm run dev
+```
+
+## 二、学习实践-(以提问的方式来学习)
+
+### **Q1:文档入库：这个项目知识库管理背后的处理逻辑是怎么样的？** 细分为：
+
+- 用户上传的文件存储在哪里？
+
+- 如何对文档进行embedding的？（总览）
+
+- 分块有什么策略？具体怎么来分的？
+
+- 用户提问的时候是怎么检索并回答问题？
+
+- 用户与该RAG的聊天记录是怎么存储的？
 
 <!-- 暂不支持的块类型: 22 -->
 
-** 为什么要用消息队列？**
+## 回答
 
-- **异步处理 → 不用等太久**
+### Q1A1: 用户上传的文件存储在哪里？
 
-- **解耦 → 模块独立**
+用户上传文件后，调用 `upload()` 方法：
 
-- **削峰 → 防止系统被压垮**
+- 代码位置：`bootstrap\src\main\java\com\nageoffer\ai\ragent\knowledge\service\impl\KnowledgeDocumentServiceImpl.java`
 
-- **保证可靠 → 不丢东西**
+- 文件存入 MinIO（对象存储）（启动MinIO后，可以通过它的web控制台来查看信息。默认监听地址为：[http://localhost:9001](http://localhost:9001/)，默认的用户名与密码都是：rustfsadmin）
 
-消息队列里的消息可以是 **请求、请求的结果或事件通知**，它的核心作用是 **在模块之间传递信息，让系统异步、可靠、解耦**。
-
-## RustFS
-
-- 一个用 **Rust 语言** 写的文件系统（file system）开发框架。
-
-- **作用**：帮你快速搭建 **高性能、可靠、可扩展的文件存储系统**。
-
-- **适合场景**：
-
-- **优势**：
+- 文档元信息写入数据库 `t_knowledge_document` 表(PostgreSQL数据库中)，状态为 `pending`
 
 <!-- 暂不支持的块类型: 22 -->
 
-简单说：
+### Q2A2: 如何对文档进行embedding的？
 
-<!-- 暂不支持的块类型: 34 -->
+文档从上传到完成 Embedding 存入向量数据库，经过一条基于**节点编排**的 Ingestion（吸收） Pipeline，每个节点负责一个独立的处理步骤。通过 `IngestionContext` 共享状态，按顺序执行，上一个节点的输出作为下一个节点的输入
 
-## Docker Image
+```
+文档上传 → Fetcher → Parser → [Enhancer] → Chunker(含Embedding) → [Enricher] → Indexer → 向量数据库
+```
 
-在 **Docker** 中，**image（镜像）** 是一个只读的模板，用来创建容器。可以把它理解成一个 **程序的“安装包”或快照**，里面包含了程序运行所需的所有东西：
+#### Pipeline 节点执行流程总览
 
-1. **操作系统环境**（比如 Ubuntu、Alpine 等）
+由 `IngestionEngine` 编排执行，每个节点都实现 `IngestionNode` 接口：
 
-2. **程序本身**（比如 RustFS）
+<!-- 暂不支持的块类型: 30 -->
 
-3. **依赖库和工具**（程序运行所需要的库、语言运行时等）
+- **Fetcher**- 文档获取节点（从多元化存储介质中检索并载入文档原始字节流）：
 
-4. **配置文件和默认设置**
+- **Parser**- 文档解析节点（将输入的字节流解析为结构化的文本或文档对象）：
 
-当你运行命令：
+- **EnhancerNode -** 文档增强节点（通过大模型对整个文档进行AI增强处理）：
 
-docker run rustfs/rustfs:latest
+- **ChunkerNode** - 文本分块节点（将完整文本切分成多个较小的文本块（Chunk））
 
-- `rustfs/rustfs:latest` 就是 Docker image
+- **EnricherNode** - 分块增强节点（对每个文档分片进行信息提取或补充 ）：
 
--  Docker 会根据这个镜像创建一个 **容器**（container），容器是镜像的 **可运行实例**
+- **IndexerNode** - 索引节点（将处理后的文档分块数据索引到向量数据库中）
 
--  你可以启动、停止、删除容器，而镜像本身不会变
+## 数据流
 
-🔹 **类比**：
+```
+原始文档 → FetcherNode(字节流) → ParserNode(结构化文本) → EnhancerNode(增强文本) 
+→ ChunkerNode(分块+向量) → EnricherNode(分块增强) → IndexerNode(向量存储)
+```
 
--  镜像 = 软件安装包（可以复制多份）
+<!-- 暂不支持的块类型: 22 -->
 
--  容器 = 安装后运行的软件实例
+### Q3A3: 分块有什么策略？具体怎么来分的？
 
-# 二、开发感悟
+### Q4A4: 用户提问的时候是怎么检索并回答问题？
+
+### Q5A5: 用户与该RAG的聊天记录是怎么存储的？
