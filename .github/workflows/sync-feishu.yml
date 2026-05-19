@@ -27,24 +27,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Notify Feishu start
-        env:
-          FEISHU_BOT_WEBHOOK: ${{ secrets.FEISHU_BOT_WEBHOOK }}
-        run: |
-          if [ -z "$FEISHU_BOT_WEBHOOK" ]; then
-            echo "FEISHU_BOT_WEBHOOK is not configured, skip notification"
-            exit 0
-          fi
-
-          curl -sS -X POST "$FEISHU_BOT_WEBHOOK" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "msg_type": "text",
-              "content": {
-                "text": "blob同步：开始从飞书同步文档到博客。"
-              }
-            }'
-
       - name: Sync from Feishu
         env:
           FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
@@ -120,12 +102,14 @@ jobs:
             exit 0
           fi
 
+          DEPLOY_TIME="$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')"
+
           if [ "$SYNC_RESULT" = "success" ] && [ "$DEPLOY_RESULT" = "success" ]; then
-            MSG="blob同步：飞书同步和博客部署成功。"
+            MSG="blob同步：博客部署成功。部署时间：$DEPLOY_TIME"
           elif [ "$SYNC_RESULT" != "success" ]; then
-            MSG="blob同步：飞书同步失败，状态：$SYNC_RESULT。日志：$RUN_URL"
+            MSG="blob同步：博客部署失败。部署时间：$DEPLOY_TIME。同步状态：$SYNC_RESULT。日志：$RUN_URL"
           else
-            MSG="blob同步：博客部署失败，状态：$DEPLOY_RESULT。日志：$RUN_URL"
+            MSG="blob同步：博客部署失败。部署时间：$DEPLOY_TIME。部署状态：$DEPLOY_RESULT。日志：$RUN_URL"
           fi
 
           curl -sS -X POST "$FEISHU_BOT_WEBHOOK" \
