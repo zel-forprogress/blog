@@ -1,15 +1,26 @@
 ---
 title: "Ragent项目开发"
-date: 2026-05-18
+date: 2026-05-19
 feishu_node_token: "BN1DwvzhDiYp7xkkZH4cjYwJnle"
-feishu_edit_time: "1779095859"
+feishu_edit_time: "1779181902"
 ---
 
 Ragent（[官方介绍链接](https://nageoffer.com/ragent)）是一个面向企业场景的 Agentic RAG 平台：**从文档入库**、**向量索引**到**多路检索**、**意图识别**、**MCP 工具调用**和**流式问答**，形成完整闭环。定位是 Java 后端开发者学习/落地 AI 应用的开源参考实现，而不是「调 API + 向量库」的 Demo。
 
 ### 技术栈
 
-<!-- 暂不支持的块类型: 30 -->
+| 类别 | 技术 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 后端框架 | Spring Boot 3.5.7 (Java 17) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 向量数据库 | Milvus 2.6.6 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 文档解析 | Apache Tika 3.2.3 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| ORM | MyBatis-Plus 3.5.14 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 对象存储 | AWS S3 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 认证授权 | Sa-Token 1.43.0 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 缓存/分布式锁 | Redisson 4.0.0 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 消息队列 | RocketMQ 2.3.5 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| MCP协议 | MCP SDK 1.1.2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 前端 | React + TypeScript + Vite |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ### 项目模块
 
@@ -44,25 +55,25 @@ ragent/
 
 使用docker来部署启动所需要的中间件，不影响我们的本地环境，方遍又快捷
 
-**1. 启动 Docker 中间件**（如果还没启动）（让ai编辑一份docker-compose.yml文件；需要先运行docker desktop）
+1. **启动 Docker 中间件**（如果还没启动）（让ai编辑一份docker-compose.yml文件；需要先运行docker desktop）
 
 ```bash
 docker compose up -d
 ```
 
-**2. 编译项目**（首次或代码有改动时）
+2. **编译项目**（首次或代码有改动时）
 
 ```bash
 mvn clean install -DskipTests
 ```
 
-**3. 启动后端**（新终端）
+3. **启动后端**（新终端）
 
 ```bash
 mvn spring-boot:run -pl bootstrap
 ```
 
-**4. 启动前端**（新终端）
+4. **启动前端**（新终端）
 
 ```bash
 cd frontend
@@ -83,7 +94,7 @@ npm run dev
 
 - 用户与该RAG的聊天记录是怎么存储的？
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ## 回答
 
@@ -97,7 +108,7 @@ npm run dev
 
 - 文档元信息写入数据库 `t_knowledge_document` 表(PostgreSQL数据库中)，状态为 `pending`
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ### Q2A2: 如何对文档进行embedding的？
 
@@ -111,7 +122,14 @@ npm run dev
 
 由 `IngestionEngine` 编排执行，每个节点都实现 `IngestionNode` 接口：
 
-<!-- 暂不支持的块类型: 30 -->
+| 节点 | 类名 | 职责 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Fetcher | FetcherNode | 从不同来源获取文档原始内容（S3、本地文件、HTTP URL、飞书） |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Parser | ParserNode | 使用 Apache Tika 解析文档（PDF/DOC/DOCX/Markdown 等）→ 纯文本 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Enhancer | EnhancerNode | 可选，用 LLM 增强文档内容（如补充上下文） |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Chunker | ChunkerNode | [object Object],[object Object] |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Enricher | EnricherNode | 可选，用 LLM 为每个 chunk 生成关键词/摘要/结构化元数据 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Indexer | IndexerNode | 将带 embedding 的 chunk 写入向量数据库 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 
 - **Fetcher**- 文档获取节点（从多元化存储介质中检索并载入文档原始字节流）：
 
@@ -132,9 +150,15 @@ npm run dev
 → ChunkerNode(分块+向量) → EnricherNode(分块增强) → IndexerNode(向量存储)
 ```
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ### Q3A3: 分块有什么策略？具体怎么来分的？
+
+该项目实现了**两种分块策略**，通过策略模式进行管理，支持灵活切换。
+
+- 策略一：FIXED_SIZE（固定大小切分）
+
+- 策略二：STRUCTURE_AWARE（结构感知切分 / Markdown友好）
 
 ### Q4A4: 用户提问的时候是怎么检索并回答问题？
 
