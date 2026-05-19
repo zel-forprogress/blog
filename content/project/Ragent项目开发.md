@@ -2,7 +2,7 @@
 title: "Ragent项目开发"
 date: 2026-05-19
 feishu_node_token: "BN1DwvzhDiYp7xkkZH4cjYwJnle"
-feishu_edit_time: "1779181902"
+feishu_edit_time: "1779186301"
 ---
 
 Ragent（[官方介绍链接](https://nageoffer.com/ragent)）是一个面向企业场景的 Agentic RAG 平台：**从文档入库**、**向量索引**到**多路检索**、**意图识别**、**MCP 工具调用**和**流式问答**，形成完整闭环。定位是 Java 后端开发者学习/落地 AI 应用的开源参考实现，而不是「调 API + 向量库」的 Demo。
