@@ -23,15 +23,26 @@ const BLOCK_TYPE_KEYS = [
   'todo',
   'bitable',
   'callout',
+  'chat_card',
+  'diagram',
   'divider',
   'file',
   'grid',
   'grid_column',
-  'image',
   'iframe',
+  'image',
+  'isv',
+  'mindnote',
   'sheet',
   'table',
   'table_cell',
+  'view',
+  'quote_container',
+  'task',
+  'okr',
+  'okr_objective',
+  'okr_key_result',
+  'okr_progress',
 ];
 
 const CODE_LANG = {
@@ -141,6 +152,101 @@ function renderImage(payload) {
   return `\n![image](https://open.feishu.cn/open-apis/drive/v1/medias/${token}/download)\n`;
 }
 
+function escapeTableCell(value) {
+  return String(value ?? '')
+    .replace(/\r?\n/g, '<br>')
+    .replace(/\|/g, '\\|')
+    .trim();
+}
+
+function columnName(n) {
+  let name = '';
+  while (n > 0) {
+    const r = (n - 1) % 26;
+    name = String.fromCharCode(65 + r) + name;
+    n = Math.floor((n - 1) / 26);
+  }
+  return name;
+}
+
+function renderMarkdownTable(rows) {
+  const normalized = rows
+    .map((row) => row.map(escapeTableCell))
+    .filter((row) => row.some(Boolean));
+
+  if (!normalized.length) return '';
+
+  const width = Math.max(...normalized.map((row) => row.length));
+  const padded = normalized.map((row) => [
+    ...row,
+    ...Array(Math.max(0, width - row.length)).fill(''),
+  ]);
+  const header = padded[0];
+  const body = padded.slice(1);
+  const separator = Array(width).fill('---');
+
+  return [
+    `| ${header.join(' | ')} |`,
+    `| ${separator.join(' | ')} |`,
+    ...body.map((row) => `| ${row.join(' | ')} |`),
+  ].join('\n');
+}
+
+function renderChildBlocks(block, ctx, inline = false) {
+  const childIds = block.children || [];
+  const rendered = childIds
+    .map((childId) => {
+      const child = ctx.map.get(childId);
+      return child ? blockToMarkdown(child, ctx) : '';
+    })
+    .filter((md) => md?.trim());
+
+  if (inline) {
+    return rendered
+      .join(' ')
+      .replace(/\n+/g, ' ')
+      .trim();
+  }
+
+  return rendered.join('\n\n');
+}
+
+function renderTable(block, ctx) {
+  const table = block.table || {};
+  const cells = table.cells?.length ? table.cells : block.children || [];
+  const columnSize = table.property?.column_size || cells.length || 1;
+  const rows = [];
+
+  for (let i = 0; i < cells.length; i += columnSize) {
+    const row = cells.slice(i, i + columnSize).map((cellId) => {
+      const cell = ctx.map.get(cellId);
+      return cell ? renderChildBlocks(cell, ctx, true) : '';
+    });
+    rows.push(row);
+  }
+
+  return renderMarkdownTable(rows);
+}
+
+async function fetchSheetValues(token, payload) {
+  const sheetToken = payload?.token || '';
+  const [spreadsheetToken, sheetId] = sheetToken.split('_');
+  if (!spreadsheetToken || !sheetId) return [];
+
+  const rowSize = Math.max(Number(payload.row_size) || 100, 1);
+  const columnSize = Math.max(Number(payload.column_size) || 26, 1);
+  const range = `${sheetId}!A1:${columnName(columnSize)}${rowSize}`;
+  const url = `https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/${spreadsheetToken}/values/${encodeURIComponent(range)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const data = await res.json();
+
+  if (data.code !== 0) {
+    throw new Error(`获取电子表格失败 (${sheetToken}): ${JSON.stringify(data)}`);
+  }
+
+  return data.data?.valueRange?.values || [];
+}
+
 async function fetchAllBlocks(token, documentId) {
   const items = [];
   let pageToken = '';
@@ -171,7 +277,7 @@ function blockToMarkdown(block, ctx) {
 
   if (type === 1) return '';
 
-  if (!payload) {
+  if (!payload && ![22, 32, 34].includes(type)) {
     return `<!-- 暂不支持的块类型: ${type} -->\n`;
   }
 
@@ -219,12 +325,21 @@ function blockToMarkdown(block, ctx) {
       return `${renderQuote(payload)}\n`;
     case 17:
       return renderTodo(payload);
+    case 19:
+    case 24:
+    case 25:
+    case 34:
+      return renderChildBlocks(block, ctx);
     case 22:
       ctx.orderedCounter = 0;
       ctx.lastListType = null;
       return '---\n';
     case 27:
       return renderImage(payload);
+    case 31:
+      return renderTable(block, ctx);
+    case 32:
+      return renderChildBlocks(block, ctx);
     default:
       if (payload.elements) {
         const text = renderInline(payload.elements).trim();
@@ -234,18 +349,27 @@ function blockToMarkdown(block, ctx) {
   }
 }
 
-function documentToMarkdown(blocks) {
+async function blockToMarkdownAsync(block, ctx) {
+  if (block.block_type === 30) {
+    const rows = await fetchSheetValues(ctx.token, block.sheet);
+    return renderMarkdownTable(rows) || '<!-- 电子表格为空 -->\n';
+  }
+
+  return blockToMarkdown(block, ctx);
+}
+
+async function documentToMarkdown(blocks, token) {
   const map = new Map(blocks.map((b) => [b.block_id, b]));
   const page = blocks.find((b) => b.block_type === 1);
   if (!page?.children?.length) return '';
 
-  const ctx = { orderedCounter: 0, lastListType: null };
+  const ctx = { orderedCounter: 0, lastListType: null, map, token };
   const parts = [];
 
   for (const childId of page.children) {
     const block = map.get(childId);
     if (!block) continue;
-    const md = blockToMarkdown(block, ctx);
+    const md = await blockToMarkdownAsync(block, ctx);
     if (md?.trim()) parts.push(md.trimEnd());
   }
 
@@ -254,7 +378,7 @@ function documentToMarkdown(blocks) {
 
 async function fetchDocumentMarkdown(token, documentId) {
   const blocks = await fetchAllBlocks(token, documentId);
-  return documentToMarkdown(blocks);
+  return documentToMarkdown(blocks, token);
 }
 
 module.exports = {
