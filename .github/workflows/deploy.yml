@@ -60,3 +60,34 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: always()
+    steps:
+      - name: Notify Feishu deployment result
+        env:
+          FEISHU_BOT_WEBHOOK: ${{ secrets.FEISHU_BOT_WEBHOOK }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$FEISHU_BOT_WEBHOOK" ]; then
+            echo "FEISHU_BOT_WEBHOOK is not configured, skip notification"
+            exit 0
+          fi
+
+          DEPLOY_TIME="$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')"
+
+          if [ "$BUILD_RESULT" = "success" ] && [ "$DEPLOY_RESULT" = "success" ]; then
+            MSG="blob同步：博客部署成功。部署时间：$DEPLOY_TIME"
+          elif [ "$BUILD_RESULT" != "success" ]; then
+            MSG="blob同步：博客部署失败。部署时间：$DEPLOY_TIME。构建状态：$BUILD_RESULT。日志：$RUN_URL"
+          else
+            MSG="blob同步：博客部署失败。部署时间：$DEPLOY_TIME。部署状态：$DEPLOY_RESULT。日志：$RUN_URL"
+          fi
+
+          curl -sS -X POST "$FEISHU_BOT_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"$MSG\"}}"
