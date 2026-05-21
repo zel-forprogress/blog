@@ -329,10 +329,16 @@ function blockToMarkdown(block, ctx) {
       ctx.orderedCounter = 0;
       ctx.lastListType = null;
       return renderHeading(type - 2, payload);
-    case 12:
+    case 12: {
       ctx.lastListType = 'bullet';
       ctx.orderedCounter = 0;
-      return `- ${renderInline(payload.elements)}\n`;
+      const bulletText = renderInline(payload.elements);
+      const bulletChildren = renderChildBlocks(block, ctx);
+      if (bulletChildren.trim()) {
+        return `- ${bulletText}\n${bulletChildren.split('\n').map(l => `  ${l}`).join('\n')}\n`;
+      }
+      return `- ${bulletText}\n`;
+    }
     case 13: {
       if (ctx.lastListType !== 'ordered') ctx.orderedCounter = 0;
       ctx.lastListType = 'ordered';
@@ -342,7 +348,12 @@ function blockToMarkdown(block, ctx) {
         seq && String(seq) !== 'auto' && /^\d+$/.test(String(seq))
           ? seq
           : String(ctx.orderedCounter);
-      return `${n}. ${renderInline(payload.elements)}\n`;
+      const orderedText = renderInline(payload.elements);
+      const orderedChildren = renderChildBlocks(block, ctx);
+      if (orderedChildren.trim()) {
+        return `${n}. ${orderedText}\n${orderedChildren.split('\n').map(l => `   ${l}`).join('\n')}\n`;
+      }
+      return `${n}. ${orderedText}\n`;
     }
     case 14:
       // 列表项后的代码块不应打断有序列表序号
