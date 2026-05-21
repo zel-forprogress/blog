@@ -176,14 +176,21 @@ function renderMarkdownTable(rows) {
 
   if (!normalized.length) return '';
 
-  const width = Math.max(...normalized.map((row) => row.length));
-  const padded = normalized.map((row) => [
-    ...row,
-    ...Array(Math.max(0, width - row.length)).fill(''),
-  ]);
-  const header = padded[0];
-  const body = padded.slice(1);
-  const separator = Array(width).fill('---');
+  // 找出有效列（至少有一行在该列有内容）
+  const maxCols = Math.max(...normalized.map((row) => row.length));
+  const validCols = [];
+  for (let col = 0; col < maxCols; col++) {
+    if (normalized.some((row) => row[col]?.trim())) {
+      validCols.push(col);
+    }
+  }
+
+  if (!validCols.length) return '';
+
+  const filtered = normalized.map((row) => validCols.map((col) => row[col] || ''));
+  const header = filtered[0];
+  const body = filtered.slice(1);
+  const separator = Array(validCols.length).fill('---');
 
   return [
     `| ${header.join(' | ')} |`,
@@ -228,9 +235,29 @@ function renderTable(block, ctx) {
   return renderMarkdownTable(rows);
 }
 
+function cellToText(cell) {
+  if (cell === null || cell === undefined) return '';
+  if (typeof cell === 'string' || typeof cell === 'number' || typeof cell === 'boolean') {
+    return String(cell);
+  }
+  if (Array.isArray(cell)) {
+    return cell
+      .map((seg) => seg?.text || '')
+      .join('')
+      .trim();
+  }
+  if (typeof cell === 'object' && cell.text) {
+    return String(cell.text);
+  }
+  return String(cell);
+}
+
 async function fetchSheetValues(token, payload) {
   const sheetToken = payload?.token || '';
-  const [spreadsheetToken, sheetId] = sheetToken.split('_');
+  const lastUnderscore = sheetToken.lastIndexOf('_');
+  if (lastUnderscore === -1) return [];
+  const spreadsheetToken = sheetToken.slice(0, lastUnderscore);
+  const sheetId = sheetToken.slice(lastUnderscore + 1);
   if (!spreadsheetToken || !sheetId) return [];
 
   const rowSize = Math.max(Number(payload.row_size) || 100, 1);
@@ -244,7 +271,8 @@ async function fetchSheetValues(token, payload) {
     throw new Error(`获取电子表格失败 (${sheetToken}): ${JSON.stringify(data)}`);
   }
 
-  return data.data?.valueRange?.values || [];
+  const raw = data.data?.valueRange?.values || [];
+  return raw.map((row) => row.map(cellToText));
 }
 
 async function fetchAllBlocks(token, documentId) {

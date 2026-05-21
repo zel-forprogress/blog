@@ -15,4 +15,9 @@ Next.js 是一个把 React 从纯前端库升级为全栈应用框架的生产�
 
 ### 具体体现：
 
-<!-- 暂不支持的块类型: 30 -->
+| 层级 | 传统方式 | Next.js 方式 |
+| --- | --- | --- |
+| 语言 | 前端 JS + 后端（Java/Go/PHP等） | 统一用 JavaScript/TypeScript |
+| 项目 | 前后端分离，两个仓库/两个部署 | 一个项目，一键部署 |
+| 接口 | 需要定义 REST/GraphQL，通过 HTTP 调用 | 直接导入函数或调用 Server Action，无需手动写接口 |
+| 数据获取 | 前端 fetch → 后端 → 返回 JSON | 服务端组件里直接 await db.query() |

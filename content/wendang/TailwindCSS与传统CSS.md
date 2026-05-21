@@ -17,7 +17,7 @@ feishu_edit_time: "1777532184"
 
 - 按钮蓝色背景、白色文字、圆角
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ## 📝 传统 CSS 写法
 
@@ -95,7 +95,7 @@ feishu_edit_time: "1777532184"
 
 - 改一个样式要去 CSS 里找对应的类名
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ## ✨ Tailwind CSS 写法
 
@@ -117,8 +117,22 @@ feishu_edit_time: "1777532184"
 
 看到区别了吗？ 所有样式都写在 `class` 属性里，用的是 Tailwind 提供的工具类。
 
-<!-- 暂不支持的块类型: 22 -->
+---
 
 ## 🔍 常用 Tailwind 类名对照表
 
-<!-- 暂不支持的块类型: 30 -->
+| 想要的效果 | Tailwind 类名 | 大致对应的 CSS |
+| --- | --- | --- |
+| 白色背景 | bg-white | background-color: white |
+| 蓝色背景 | bg-blue-500 | background-color: #3b82f6 |
+| 圆角（小/中/大） | rounded / rounded-lg / rounded-full | border-radius: 0.25rem / 0.5rem / 9999px |
+| 阴影 | shadow / shadow-md / shadow-lg | box-shadow: ... |
+| 内边距 | p-4（四周）、px-4（左右）、py-2（上下） | padding: 1rem / 0 1rem / 0.5rem 0 |
+| 外边距 | m-4、mt-2（上）、mb-3（下） | margin |
+| 文字大小 | text-sm、text-xl、text-2xl | font-size |
+| 文字粗细 | font-normal、font-bold | font-weight |
+| 文字颜色 | text-gray-500、text-red-600 | color |
+| 弹性布局 | flex、justify-between、items-center | display: flex + 对齐属性 |
+| 网格布局 | grid、grid-cols-3、gap-4 | display: grid + 列数 + 间距 |
+| 悬停效果 | hover:bg-blue-600 | &:hover { background-color } |
+| 响应式（手机优先） | md:flex、lg:text-2xl | 屏幕宽度 >= 768px 时才应用 |

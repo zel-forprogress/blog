@@ -9,18 +9,18 @@ Ragent（[官方介绍链接](https://nageoffer.com/ragent)）是一个面向企
 
 ### 技术栈
 
-| 类别 | 技术 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 后端框架 | Spring Boot 3.5.7 (Java 17) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 向量数据库 | Milvus 2.6.6 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 文档解析 | Apache Tika 3.2.3 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| ORM | MyBatis-Plus 3.5.14 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 对象存储 | AWS S3 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 认证授权 | Sa-Token 1.43.0 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 缓存/分布式锁 | Redisson 4.0.0 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 消息队列 | RocketMQ 2.3.5 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| MCP协议 | MCP SDK 1.1.2 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 前端 | React + TypeScript + Vite |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 类别 | 技术 |
+| --- | --- |
+| 后端框架 | Spring Boot 3.5.7 (Java 17) |
+| 向量数据库 | Milvus 2.6.6 |
+| 文档解析 | Apache Tika 3.2.3 |
+| ORM | MyBatis-Plus 3.5.14 |
+| 对象存储 | AWS S3 |
+| 认证授权 | Sa-Token 1.43.0 |
+| 缓存/分布式锁 | Redisson 4.0.0 |
+| 消息队列 | RocketMQ 2.3.5 |
+| MCP协议 | MCP SDK 1.1.2 |
+| 前端 | React + TypeScript + Vite |
 
 ### 项目模块
 
@@ -122,14 +122,14 @@ npm run dev
 
 由 `IngestionEngine` 编排执行，每个节点都实现 `IngestionNode` 接口：
 
-| 节点 | 类名 | 职责 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Fetcher | FetcherNode | 从不同来源获取文档原始内容（S3、本地文件、HTTP URL、飞书） |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Parser | ParserNode | 使用 Apache Tika 解析文档（PDF/DOC/DOCX/Markdown 等）→ 纯文本 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Enhancer | EnhancerNode | 可选，用 LLM 增强文档内容（如补充上下文） |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Chunker | ChunkerNode | [object Object],[object Object] |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Enricher | EnricherNode | 可选，用 LLM 为每个 chunk 生成关键词/摘要/结构化元数据 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Indexer | IndexerNode | 将带 embedding 的 chunk 写入向量数据库 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| 节点 | 类名 | 职责 |
+| --- | --- | --- |
+| Fetcher | FetcherNode | 从不同来源获取文档原始内容（S3、本地文件、HTTP URL、飞书） |
+| Parser | ParserNode | 使用 Apache Tika 解析文档（PDF/DOC/DOCX/Markdown 等）→ 纯文本 |
+| Enhancer | EnhancerNode | 可选，用 LLM 增强文档内容（如补充上下文） |
+| Chunker | ChunkerNode | 核心：文本分块 + Embedding 向量化 |
+| Enricher | EnricherNode | 可选，用 LLM 为每个 chunk 生成关键词/摘要/结构化元数据 |
+| Indexer | IndexerNode | 将带 embedding 的 chunk 写入向量数据库 |
 
 - **Fetcher**- 文档获取节点（从多元化存储介质中检索并载入文档原始字节流）：
 

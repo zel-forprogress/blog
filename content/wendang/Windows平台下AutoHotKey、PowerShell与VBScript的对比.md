@@ -22,7 +22,8 @@ feishu_edit_time: "1769063441"
 
 在本地**按照AutoHotKey的语法**编写完ahk脚本文件后，双击后，启动脚本文件，其加载后常驻后台，热键随时可用，几乎**零延迟**。
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/Xn9YbVaZFo2J4kxPuqyc11LVnTf/download)
 
 然后就可以使用**快捷键**来使用该脚本文件编写的任务。
 
@@ -32,7 +33,8 @@ feishu_edit_time: "1769063441"
 
 例如：我编写了一个使用快捷键“ctrl+J”即可弹窗展来示目标任务的.ahk文件，编写保存完该脚本后，直接双击该脚本文件，然后可以在全局使用快捷键“ctrl+J”来调用脚本文件实现任务。
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/MxpZbUnfEoPNsgxZXWqcNKtCnM9/download)
 
 下面的所有任务，也都是编写脚本定义一个来执行该脚本的快捷键；双击该脚本后，该脚本就会常驻后台。然后使用快捷键执行任务。
 
@@ -48,7 +50,8 @@ feishu_edit_time: "1769063441"
 
 例如：编写无编译的快捷启动面板（点击按钮打开不同工具）。
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/AdaRbXqg1oQe3qxCXxOcshUVnzh/download)
 
 5. 系统轻量操作辅助
 
@@ -66,7 +69,8 @@ feishu_edit_time: "1769063441"
 
 - 找出桌面最近7天修改的文件并按大小排序：`ls ~/Desktop -File -Recurse | ? { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | sort Length -Descending`
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/KcYYbBPkHohYQ3x3bAZc5kaFnug/download)
 
 - 批量改文件的后缀名
 
@@ -76,21 +80,25 @@ feishu_edit_time: "1769063441"
 
 - 测试 HTTPS 是否通：`tnc ``google.com`` -Port 443`
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/Lp6gbSfwaobGDFxSet7ceP0UnFg/download)
 
 - 吃cpu前10的进程：`Get-Process | sort CPU -Descending | Select -First 10`
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/RbJPbd0CeoUydIxxIuwchvsPnBF/download)
 
 1. 与网络与下载相关的
 
 - 下载图片或文件 `curl "``https://example.com/image.jpg``" -OutFile "D:\pic.jpg"`（将豆包官方的头像图片，下载到本地路径）
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/PYUsbbgbKoG5LixDanccB4W2nae/download)
 
 - 调用API--下面这个例子是调用公开的API从而获得信息。
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/LAvHbT9ZmoZIeqxBgqec3MJrnkc/download)
 
 1. 定时任务：
 
@@ -102,7 +110,8 @@ feishu_edit_time: "1769063441"
 
 - 展示cpu使用排行（使用一个新建窗口来展示记录）：`Get-Process | Select Name,Id,CPU,WorkingSet | Sort CPU -Desc | Out-GridView -Title "Top Processes"`
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/CVzObGm5VowuG3xFMbUcM8nunNh/download)
 
 # **VBScript**
 
@@ -114,14 +123,16 @@ VBScript 脚本（`.vbs` 文件）是 Windows 内置的轻量脚本，无额外�
 
 如下面的hello.vbs文件双击运行后，会自动跳转到bilibili的官网。
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/DwTfb6PploeglkxkZERcDCbBnvd/download)
 
 VBS的最常见的日常用途：
 
 1. 弹出带输入框的问候 + 当前时间（最经典的“Hello World”升级版）
 `MsgBox "今天是 " & Date & vbCrLf & "现在时间：" & Time & vbCrLf & "欢迎回来！", 64, "每日问候"`
 
-<!-- 暂不支持的块类型: 27 -->
+
+![image](https://open.feishu.cn/open-apis/drive/v1/medias/OgLLbvl2GoADH2xDPrgcq3IwnSc/download)
 
 2. 一键清空回收站（很多人桌面常放这个）
 

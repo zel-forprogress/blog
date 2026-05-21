@@ -7,7 +7,7 @@ feishu_edit_time: "1777348798"
 
 **OCR** 在“**OCR语言设置**”中的全称是：
 
-<!-- 暂不支持的块类型: 34 -->
+**Optical Character Recognition中文名称**：**光学字符识别**（也常称为文字识别）
 
 ### 简单解释什么是 OCR？
 
