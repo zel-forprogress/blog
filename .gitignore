@@ -21,3 +21,6 @@ scripts/node_modules/
 
 # 飞书密钥（勿提交）
 scripts/.env
+
+# 飞书同步状态（每次同步都会更新）
+scripts/.feishu-sync-state.json
