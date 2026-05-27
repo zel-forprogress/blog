@@ -1,8 +1,8 @@
 ---
 title: "Ragent项目开发"
-date: 2026-05-19
+date: 2026-05-27
 feishu_node_token: "BN1DwvzhDiYp7xkkZH4cjYwJnle"
-feishu_edit_time: "1779186301"
+feishu_edit_time: "1779850582"
 ---
 
 Ragent（[官方介绍链接](https://nageoffer.com/ragent)）是一个面向企业场景的 Agentic RAG 平台：**从文档入库**、**向量索引**到**多路检索**、**意图识别**、**MCP 工具调用**和**流式问答**，形成完整闭环。定位是 Java 后端开发者学习/落地 AI 应用的开源参考实现，而不是「调 API + 向量库」的 Demo。
@@ -268,5 +268,32 @@ npm run dev
   - 四个参数：targetChars（是打包时的**理想目标**，不是硬性要求）、overlapChars（相邻块重叠大小）、maxChars（块的硬上限）、minChars（块的最小下限）
 
 ### Q4A4: 用户提问的时候是怎么检索并回答问题？
+
+**完整流程：**
+ 用户提问
+ │
+ ▼
+ ① 记忆加载（loadMemory）【加载对话历史，让 LLM 理解上下文。】
+ │
+ ▼
+ ② 查询改写 + 拆分（rewriteQuery）
+ │
+ ▼
+ ③ 意图解析（resolveIntents）
+ │
+ ▼
+ ④ 歧义引导检查（handleGuidance）──→ 有歧义？直接返回引导提示
+ │ 无歧义
+ ▼
+ ⑤ 纯系统响应检查（handleSystemOnly）──→ 纯系统意图？直接用系统Prompt回答
+ │ 非纯系统
+ ▼
+ ⑥ 多通道检索（retrieve）
+ │
+ ▼
+ ⑦ Prompt 组装 + LLM 流式回答（streamRagResponse）
+ │
+ ▼
+ 返回给用户
 
 ### Q5A5: 用户与该RAG的聊天记录是怎么存储的？
